@@ -1,12 +1,12 @@
 from fastapi import HTTPException, Depends, status
 from fastapi.security.http import HTTPBearer
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from service.api.schemas import User
 
 # Настройки JWT
 SECRET_KEY = "YOUR_SECRET_KEY"
+DEV_SECRET_KET = "TOP_SECRET_KEY"
 ALGORITHM = "HS256"
 
 bearer_scheme = HTTPBearer()
@@ -41,3 +41,9 @@ async def get_current_user(token: str = Depends(bearer_scheme)) -> User:
     
     return User(id=user_id,
                 username=username)
+
+async def check_dev_key(token: str = Depends(bearer_scheme)):
+
+    if token.credentials != DEV_SECRET_KET:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Access denied")

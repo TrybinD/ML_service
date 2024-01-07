@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 
 from service.api.db import async_session_maker
 
@@ -30,7 +30,13 @@ class SQLAlchemyRepository(AbstractRepository):
             stmt = select(self.model).filter_by(**kwargs)
             results = await session.execute(stmt)
             if unique:
-                results = results.one_or_none()[0]
+                results = results.scalar_one_or_none()
             else:
-                results = [res[0] for res in results.all()]
+                results = results.scalars().all()
             return results
+        
+    async def update(self, data: dict, **kwargs):
+        async with async_session_maker() as session:
+            stmt = update(self.model).filter_by(**kwargs).values(**data)
+            await session.execute(stmt)
+            await session.commit()

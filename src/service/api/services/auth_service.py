@@ -1,5 +1,7 @@
 from hashlib import md5
 
+from fastapi import HTTPException
+
 from service.api.schemas import UserLogin, UserRegister, SignInResponse, User
 from service.api.repositories.base import AbstractRepository
 from service.api.security import create_access_token
@@ -17,9 +19,10 @@ class AuthService:
         db_user: DBUser = await self.users_repo.find_by_options(username=user.username, unique=True)
 
         if db_user is None:
-            raise Exception("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+        
         if db_user.hash_password != md5(user.password.encode('utf-8')).hexdigest():
-            raise Exception("Password is incorrect")
+            raise HTTPException(status_code=403, detail="Password is incorrect")
         
         user: User = User(id=db_user.id, username=db_user.username)
         
@@ -34,7 +37,7 @@ class AuthService:
         db_user = await self.users_repo.find_by_options(username=user.username, unique=True)
 
         if db_user is not None:
-            raise Exception("User already exists")
+            raise HTTPException(status_code=403, detail="User already exists")
         
         user_id = await self.users_repo.add(data={"username": user.username, 
                                                   "hash_password": md5(user.password.encode('utf-8')).hexdigest(),

@@ -28,7 +28,7 @@ class EmbenddingsModel(AbstractModel):
 
         self.model.fit(X, y)
 
-    def predict(self, data, *args, **kwargs) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         data = create_emmbenddings(data)
 
         ans = pd.DataFrame()
@@ -37,7 +37,7 @@ class EmbenddingsModel(AbstractModel):
 
         return ans
     
-    def predict_proba(self, data, *args, **kwargs) -> pd.DataFrame:
+    def predict_proba(self, data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         data = create_emmbenddings(data)
 
         ans = pd.DataFrame()

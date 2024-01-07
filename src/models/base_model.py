@@ -12,7 +12,11 @@ class AbstractModel(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def predict(self, *args, **kwargs) -> pd.DataFrame:
+    def predict(self, data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def predict_proba(self, data: pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         raise NotImplementedError
     
     def save(self, filename: Path) -> None:

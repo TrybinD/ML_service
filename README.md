@@ -14,4 +14,6 @@
 
 3) Запуск сервера:
 
-    `python run main.py`
+    `python run main.py` - Запуск основного сервиса
+    `celery -A src.service.api.tasks.make_prediction:celery worker --loglevel=INFO` - Запуск celery для фоновых задач
+    `celery -A src.service.api.tasks.make_prediction:celery flower` - Запуск сервиса мониторинга
