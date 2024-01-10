@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контроль за Пожилыми - Главная</title>
+    <link href="{{ url_for('static', path='/css/index.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', path='/js/index.js') }}"></script>
+</head>
+<body>
+
+<header>
+    <h1>Служба Контроля за Пожилыми</h1>
+    <div>
+        <p>{{ user_name }}</p>
+        <p id="userBalance">Баланс:</p>
+        <span id="balanceLoader">◡</span>
+        <button onclick="logout()">Выход</button>
+    </div>
+</header>
+
+<main>
+
+    <div id="left-container">
+
+        <div class="tab">
+            <input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
+            <label for="tab-btn-1">Из БД</label>
+            <input id="tab-btn-2" name="tab-btn" type="radio" value="">
+            <label for="tab-btn-2">Из файла</label>
+            <div class="tab-content" id="content-1">
+                <h2>Ввод Даты и Времени</h2>
+
+                <h3>Начало</h3>
+                <div class="datetime-container">
+                    <label for="startDate">Дата:</label>
+                    <input type="date" id="startDate" name="startDate" required>
+                    <label for="startTime">Время:</label>
+                    <input type="time" id="startTime" name="startTime" required>
+                </div>
+        
+                <h3>Окончание</h3>
+                <div class="datetime-container">
+                    <label for="endDate">Дата:</label>
+                    <input type="date" id="endDate" name="endDate" required>
+                    <label for="endTime">Время:</label>
+                    <input type="time" id="endTime" name="endTime" required>
+                </div>
+            </div>
+            <div class="tab-content" id="content-2">
+                <h2>Выбор файла</h2>
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" id="csvFile" name="csvFile" accept=".csv">
+                </form>
+            </div>
+        </div>
+    
+        <h2>Выбор Модели</h2>
+        <label for="carModel">Модель:</label>
+        <select id="carModel" name="carModel" required>
+            {% for model in models %}
+                <option value='{{model.name}}'>{{model.name}}</option>
+            {% endfor %}
+        </select>
+
+        <button onclick="sendRequest()">Отправить запрос</button>
+    </div>
+    
+    <div id="right-container">
+        <h1>Результаты Прогнозов</h1>
+
+        <table id="predictionsTable">
+            <thead>
+                <tr>
+                    <th>Prediction ID</th>
+                    <th>Model Name</th>
+                    <th>Created At</th>
+                    <th>Results</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Здесь будут отображаться результаты прогнозов -->
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Добавляем дополнительный элемент для всплывающего окна -->
+<div id="notification-popup">Запрос отправлен успешно!</div>
+
+<script>
+    
+    // Вызываем функцию для получения баланса после загрузки страницы
+    window.onload = fetchBalance;
+
+</script>
+
+</body>
+</html>

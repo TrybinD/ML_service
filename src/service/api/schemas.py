@@ -3,6 +3,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from service.api.models import DBPrediction
+
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -29,10 +31,15 @@ class PredictionResult(BaseModel):
 
 class PredictionResponse(BaseModel):
     prediction_id: int
+    prediction_model_id: int
+    created_at: datetime
     prediction_results: Optional[List[PredictionResult]]
+    error_info: Optional[str]
 
     @classmethod
-    def from_data_dict(cls, prediction_id:int, data_dict: dict):
+    def from_db_prediction(cls, db_prediction: DBPrediction):
+
+        data_dict = db_prediction.output_data
 
         if data_dict is None:
             results = None
@@ -42,8 +49,11 @@ class PredictionResponse(BaseModel):
                                              data_dict["anomaly_prediction"].values(),
                                              data_dict["anomaly_proba"].values())]
 
-        responce = PredictionResponse(prediction_id = prediction_id,
-                                      prediction_results=results)
+        responce = PredictionResponse(prediction_id = db_prediction.id,
+                                      prediction_model_id=db_prediction.predictor_id,
+                                      created_at=db_prediction.created_at,
+                                      prediction_results=results,
+                                      error_info=db_prediction.error_info)
     
         return responce
 

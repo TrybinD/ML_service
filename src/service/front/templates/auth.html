@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link href="{{ url_for('static', path='/css/auth.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="login-container">
+    <h2 id="formTitle">Авторизация</h2>
+    <form id="authForm">
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div id="emailField" class="form-group" style="display:none;">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+            <button type="button" onclick="authenticate()">Войти</button>
+        </div>
+    </form>
+
+    <p id="toggleLink">Нет аккаунта? <a href="javascript:void(0);" onclick="toggleForm()">Зарегистрируйтесь</a></p>
+</div>
+
+<script>
+    var isLoginForm = true;
+
+    function toggleForm() {
+        isLoginForm = !isLoginForm;
+        var formTitle = document.getElementById("formTitle");
+        var authForm = document.getElementById("authForm");
+        var emailField = document.getElementById("emailField");
+        var toggleLink = document.getElementById("toggleLink");
+
+        if (isLoginForm) {
+            formTitle.textContent = "Авторизация";
+            authForm.action = "javascript:void(0);";
+            emailField.style.display = "none";
+            toggleLink.innerHTML = "Нет аккаунта? <a href='javascript:void(0);' onclick='toggleForm()'>Зарегистрируйтесь</a>";
+        } else {
+            formTitle.textContent = "Регистрация";
+            authForm.action = "javascript:void(0);";
+            emailField.style.display = "block";
+            toggleLink.innerHTML = "Уже есть аккаунт? <a href='javascript:void(0);' onclick='toggleForm()'>Войдите</a>";
+        }
+    }
+
+    function authenticate() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var email = document.getElementById("email").value;
+
+        var url = isLoginForm ? '/api/auth/sign-in' : '/api/auth/sign-up/'; // Замените на реальные пути обработчиков на сервере
+
+        // Пример использования Fetch API для отправки POST-запроса
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                email: email
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обработка данных, полученных от сервера
+            console.log('Ответ от сервера:', data);
+
+            // Проверяем, есть ли токен в ответе
+            if (data.access_token) {
+                // Устанавливаем токен в cookie
+                document.cookie = 'access_token=' + data.access_token + '; path=/'; // Вы можете дополнительно указать домен и другие параметры
+                console.log('Токен сохранен в cookie.');
+
+                // Перенаправляем на другой адрес
+                window.location.href = '/';
+            } else {
+                console.error('Токен отсутствует в ответе сервера.');
+            }
+        })
+        .catch((error) => {
+            console.error('Ошибка:', error);
+        });
+    }
+</script>
+
+</body>
+</html>

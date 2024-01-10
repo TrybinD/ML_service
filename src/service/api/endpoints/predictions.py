@@ -14,7 +14,7 @@ router = APIRouter(prefix="/predictions", tags=["predictions"])
 @router.post("/from-file/{model}")
 async def create_prediction_from_file(model: str, 
                                       prediction_service: Annotated[PredictionService, Depends(prediction_service)],
-                                      file: UploadFile = File(),
+                                      file: UploadFile = File(...),
                                       user: User = Depends(get_current_user)) -> int:
     """Create prediction task to determinate hours in file is normal or anomaly"""
     # TODO: add validation for columns and datetimes
@@ -32,8 +32,8 @@ async def create_prediction_from_data(model: str,
 
     prediction_id = await prediction_service.register_prediction(user_id=user.id, 
                                                                  model=model,
-                                                                 start_datetime=datetime.strptime(start_datetime, "%d.%m.%Y %H:%M"),
-                                                                 end_datetime=datetime.strptime(end_datetime, "%d.%m.%Y %H:%M"))
+                                                                 start_datetime=datetime.strptime(start_datetime, "%Y-%m-%d %H:%M"),
+                                                                 end_datetime=datetime.strptime(end_datetime, "%Y-%m-%d %H:%M"))
     return prediction_id
 
 @router.get("/{prediction_id}")
@@ -44,11 +44,9 @@ async def get_prediction_by_id(prediction_id: int,
 
     prediction = await prediction_service.get_predictions(user_id=user.id, 
                                                           prediction_id=prediction_id)
-    
-    prediction_results = prediction.output_data
 
-    responce = PredictionResponse.from_data_dict(prediction_id=prediction.id,
-                                                 data_dict=prediction_results)
+
+    responce = PredictionResponse.from_db_prediction(prediction)
     
     return responce
 
@@ -63,8 +61,6 @@ async def get_prediction_all(prediction_service: Annotated[PredictionService, De
                                                            only_finished=only_finished, 
                                                            only_succeed=only_succeed)
 
-    responces = [PredictionResponse.from_data_dict(prediction_id=prediction.id,
-                                                   data_dict=prediction.output_data)
-                for prediction in predictions]
+    responces = [PredictionResponse.from_db_prediction(prediction) for prediction in predictions]
     
     return responces
